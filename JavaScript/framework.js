@@ -17,10 +17,29 @@ const sfs = require('sandboxed-fs');
 const context = {
   module: {},
   console,
+  __dirname,
   require: (name) => {
     if (name === 'fs') return sfs.bind('./');
-    let exported = execute('./node_modules/' + name + '/index.js');
-    if (!exported) exported = require(name);
+    module.paths.forEach((curPath) => {
+      fs.access(curPath, fs.constants.F_OK, (err) => {
+        if (!err) {
+          fs.readdirSync(curPath).forEach((curModule) => {
+            if (name === curModule) {
+              console.log(curPath + '/' + curModule);
+              return execute(curPath + '/' + curModule)
+            }
+          });
+        } 
+      });
+    });
+    fs.readdirSync('./').forEach((curFile) => {
+      console.log('REQUIRE ++++++++++++++++++++++++++++')
+      if (name === __dirname + '/' + curFile) {
+        console.log('./' + curFile);
+        return execute('./' + curFile)
+      }
+    });
+    // return require();
   }
 };
 
@@ -30,11 +49,11 @@ const sandbox = vm.createContext(context);
 function execute(fileName) {
   console.log(fileName);
   fs.readFile(fileName, (err, src) => {
-    console.log(src);
+    console.log(src.toString());
     let script;
     try {
       script = new vm.Script(src, { timeout: PARSING_TIMEOUT });
-      console.dir({ script });
+      //console.dir({ script });
     } catch (e) {
       console.dir(e);
       process.exit(1);

@@ -8,17 +8,19 @@
 console.log('From application global context');
 
 const fs = require('fs');
-console.dir({ fs });
+console.dir( fs.OTL );
+require(__dirname + '/module.js');
+// console.log(fs.readdirSync('../../../../../s'));
+// const mkdirp = require('mkdirp');
+// console.dir({ mkdirp });
 
-const mkdirp = require('mkdirp');
-console.dir({ mkdirp });
-
-mkdirp('/hello/world', (err) => {
-  if (err) console.error(err);
-  else console.log('pow!');
-});
-
+// mkdirp('/hello/world', (err) => {
+//   if (err) console.error(err);
+//   else console.log('pow!');
+// });
+console.log('BBBBBBBBBBBBBBBBBBBBBBBBBBBB')
 module.exports = () => {
   // Print from the exported function context
   console.log('From application exported function');
 };
+
