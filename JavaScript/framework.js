@@ -3,7 +3,6 @@
 // Example showing us how the framework creates an environment (sandbox) for
 // appication runtime, load an application code and passes a sandbox into app
 // as a global context and receives exported application interface
-
 const PARSING_TIMEOUT = 1000;
 const EXECUTION_TIMEOUT = 5000;
 
@@ -21,22 +20,23 @@ const context = {
   require: (name) => {
     if (name === 'fs') return sfs.bind('./');
     module.paths.forEach((curPath) => {
+      console.log('A', curPath)
       fs.access(curPath, fs.constants.F_OK, (err) => {
+
         if (!err) {
+          console.log('B', curPath)
           fs.readdirSync(curPath).forEach((curModule) => {
             if (name === curModule) {
-              console.log(curPath + '/' + curModule);
-              return execute(curPath + '/' + curModule)
+              const enterPoint = require('./package.json').main
+              return execute(curPath + '/' + curModule + '/' + enterPoint);
             }
           });
-        } 
+        }
       });
     });
     fs.readdirSync('./').forEach((curFile) => {
-      console.log('REQUIRE ++++++++++++++++++++++++++++')
       if (name === __dirname + '/' + curFile) {
-        console.log('./' + curFile);
-        return execute('./' + curFile)
+        return execute('./' + curFile);
       }
     });
     // return require();
@@ -47,9 +47,8 @@ context.global = context;
 const sandbox = vm.createContext(context);
 
 function execute(fileName) {
-  console.log(fileName);
   fs.readFile(fileName, (err, src) => {
-    console.log(src.toString());
+    //console.log(src.toString());
     let script;
     try {
       script = new vm.Script(src, { timeout: PARSING_TIMEOUT });
